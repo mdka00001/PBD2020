@@ -1,0 +1,89 @@
+---
+title: "Assignment1"
+author: "Md Adnan Karim (7002536), Ahmad Lamloum"
+date: "5/18/2020"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+  word_document: default
+---
+Exercise 1.1
+
+```{r}
+
+library("ggplot2")
+library("dplyr")
+library("factoextra")
+pca_toy <- read.delim("A://AI/Process/pca_toy.txt")
+
+```
+
+(a)
+It is necesssary to standardize data before principle Component Analysis because standardization of all the variables of a dataset will have same standard deviation. In this analysis, we found that PC1 has a standard deviation of 1.72. Thus, for PC1, all variables will have same weight and will be plotted against a single axis for.
+
+```{r}
+
+#Standardization of pca_toy dataset
+pca_df <- data.frame(scale(pca_toy))
+myPr <- prcomp(pca_df)
+
+head(pca_df)
+
+```
+
+
+(b)
+
+```{r}
+#scatter plot with PC1 and PC2
+
+
+
+
+pca <- cbind(pca_df, myPr$x[,1:2])
+
+
+
+ggplot(pca, aes(PC1, PC2)) +
+  stat_ellipse(geom = "polygon", col ="black", alpha = 0.5)+
+  geom_point(shape = 21, col = "black")
+
+```
+
+
+(c)
+"Barplot of PC1 Percentage" shows that variable "c" contributes for above 25% of PC1. "Barplot of PC2 Percentage" shows that variable "b" contributes for above 40% of total variables in PC2. It can be stated that "c" and "b" highly contributes to PC1 and PC2, respectively.
+```{r}
+#determining responsible variables
+var <- get_pca_var(myPr)
+
+barplot(var$contrib[,1], main = "Barplot of PC1 Percentage", xlab = "Percent", ylab = "Variables")
+barplot(var$contrib[,2], main = "Barplot of PC2 Percentage", xlab = "Percent", ylab = "Variables")
+```
+
+
+(d)
+A total of 86.9% variation has been explained by PC1 and PC2. The importance of components chart below shows that PC1 correspond to 0.7316 of the variation, followed by PC2 with 0.1366. "My PCA Graph", shows PC1 corresponds to 73.2% and PC2 corresponds to 13.7% of variations in this dataset.
+```{r}
+#to determine the percentage of variance 
+myPr.var <- myPr$sdev^2
+myPr.var.par <- round(myPr.var/sum(myPr.var)*100,1)
+
+
+barplot(myPr.var.par, main = "Scree Plot", xlab = "Principal Component",
+        ylab = "Percent Variation")
+p=data.frame(myPr$x)
+
+myPr.data <- data.frame(sample=rownames(p),
+                        X=p[,1],
+                        Y=p[,2])
+ggplot(data=myPr.data, aes(x=X, y=Y, label=sample))+
+  geom_text()+
+  xlab(paste("PC1 - ", myPr.var.par[1], "%", sep=""))+
+  ylab(paste("PC2 - ", myPr.var.par[2], "%", sep=""))+
+  theme_bw()+
+  ggtitle("My PCA Graph")
+summary(myPr)
+```
+
